@@ -1,4 +1,4 @@
-module peer
+module github.com/mbia-ITU/DISYS-HandIn-4
 
 go 1.19
 
