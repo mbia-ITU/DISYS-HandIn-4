@@ -94,23 +94,29 @@ func (p *peer) sendPingToAll() {
 }
 
 /*
-func priority(peer_id int, other_peer_id int) bool {
-	if peer_id < other_peer_id {
-		return true
-	} else if other_peer_id > peer_id {
-		return false
-	} else {
-		if id < peer_id {
-			return true
-		} else {
-			return false
-		}
-	}
-
-}
 
 func add_to_request_queue(peer_id int){
 	queued_requests = append(queued_requests, peer_id)
 }
 
+
+func Am_I_priority(pj_id int, lc_pj int) bool {
+
+	if lc_requisicao < lc_pj {
+
+		return true
+	} else if lc_pj > lc_requisicao {
+
+		return false
+	} else {
+
+		if id < pj_id {
+
+			return true
+		} else {
+
+			return false
+		}
+	}
+}
 */
