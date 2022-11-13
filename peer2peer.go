@@ -92,3 +92,25 @@ func (p *peer) sendPingToAll() {
 		p.timestamp++
 	}
 }
+
+/*
+func priority(peer_id int, other_peer_id int) bool {
+	if peer_id < other_peer_id {
+		return true
+	} else if other_peer_id > peer_id {
+		return false
+	} else {
+		if id < peer_id {
+			return true
+		} else {
+			return false
+		}
+	}
+
+}
+
+func add_to_request_queue(peer_id int){
+	queued_requests = append(queued_requests, peer_id)
+}
+
+*/
