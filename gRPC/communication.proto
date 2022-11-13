@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package ping;
+
+service Ping {
+    rpc ping (Request) returns (Reply) {}
+}
+
+message Reply {
+    var message string = "Hi";
+}
+
+message Request {
+    int32 id = 0;
+}
