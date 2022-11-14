@@ -8,13 +8,14 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	ping "github.com/mbia-ITU/DISYS-HandIn-4/gRPC/gRPC"
 	"google.golang.org/grpc"
 )
 
-var citicalsection bool
-var queued_requests []int32
+var i_want_to_get_into_citicalsection bool
+var queued_requests []peer
 
 func main() {
 	arg1, _ := strconv.ParseInt(os.Args[1], 10, 32)
@@ -77,15 +78,23 @@ type peer struct {
 }
 
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
-	//id := req.Id
+	if i_want_to_get_into_citicalsection && priority(p, req.GetId(), req.GetTimestamp()) {
+		time.Sleep(10 * time.Second)
+	} else {
+		rep := &ping.Reply{Message: "you're free to go"}
+		p.timestamp++
+		return rep, nil
+	}
 
 	rep := &ping.Reply{Message: "you're free to go"}
 	p.timestamp++
+	time.Sleep(10 * time.Second)
 	return rep, nil
 }
 
 func (p *peer) sendPingToAll() {
 	request := &ping.Request{Id: p.id, Timestamp: p.timestamp}
+	i_want_to_get_into_citicalsection = true
 	for id, client := range p.clients {
 		reply, err := client.Ping(p.ctx, request)
 		if err != nil {
@@ -94,6 +103,9 @@ func (p *peer) sendPingToAll() {
 		fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
 		p.timestamp++
 	}
+	/*Access critical section
+
+	 */
 }
 
 func priority(p *peer, id int32, clock int32) bool {
@@ -110,6 +122,6 @@ func priority(p *peer, id int32, clock int32) bool {
 	}
 }
 
-func add_to_request_queue(p *peer) {
-	queued_requests = append(queued_requests, p.id)
+func add_to_request_queue(p peer) {
+	queued_requests = append(queued_requests, p)
 }
