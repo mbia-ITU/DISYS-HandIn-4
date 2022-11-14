@@ -85,7 +85,7 @@ func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error)
 }
 
 func (p *peer) sendPingToAll() {
-	request := &ping.Request{Id: p.id}
+	request := &ping.Request{Id: p.id, Timestamp: p.timestamp}
 	for id, client := range p.clients {
 		reply, err := client.Ping(p.ctx, request)
 		if err != nil {
@@ -113,25 +113,3 @@ func priority(p *peer, id int32, clock int32) bool {
 func add_to_request_queue(p *peer) {
 	queued_requests = append(queued_requests, p.id)
 }
-
-/*
-func Am_I_priority(pj_id int, lc_pj int) bool {
-
-	if lc_requisicao < lc_pj {
-
-		return true
-	} else if lc_pj > lc_requisicao {
-
-		return false
-	} else {
-
-		if id < pj_id {
-
-			return true
-		} else {
-
-			return false
-		}
-	}
-}
-*/
