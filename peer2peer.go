@@ -88,7 +88,6 @@ func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error)
 
 	rep := &ping.Reply{Message: "you're free to go"}
 	p.timestamp++
-	time.Sleep(10 * time.Second)
 	return rep, nil
 }
 
