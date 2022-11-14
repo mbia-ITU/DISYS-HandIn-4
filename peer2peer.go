@@ -80,6 +80,7 @@ type peer struct {
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
 	if i_want_to_get_into_citicalsection && priority(p, req.GetId(), req.GetTimestamp()) {
 		time.Sleep(10 * time.Second)
+		//Only beat one other peer. How do we make it wait until other peers are checked and beaten?
 	} else {
 		rep := &ping.Reply{Message: "you're free to go"}
 		p.timestamp++
