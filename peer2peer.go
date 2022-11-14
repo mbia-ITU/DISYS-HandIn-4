@@ -15,7 +15,7 @@ import (
 )
 
 var i_want_to_get_into_citicalsection bool
-var queued_requests []peer
+var queued_requests []int32
 
 func main() {
 	arg1, _ := strconv.ParseInt(os.Args[1], 10, 32)
@@ -80,16 +80,14 @@ type peer struct {
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
 	if i_want_to_get_into_citicalsection && priority(p, req.GetId(), req.GetTimestamp()) {
 		time.Sleep(10 * time.Second)
+		add_to_request_queue(req.GetId())
+		return nil, nil
 		//Only beat one other peer. How do we make it wait until other peers are checked and beaten?
 	} else {
 		rep := &ping.Reply{Message: "you're free to go"}
 		p.timestamp++
 		return rep, nil
 	}
-
-	rep := &ping.Reply{Message: "you're free to go"}
-	p.timestamp++
-	return rep, nil
 }
 
 func (p *peer) sendPingToAll() {
@@ -103,9 +101,8 @@ func (p *peer) sendPingToAll() {
 		fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
 		p.timestamp++
 	}
-	/*Access critical section
+	/*Access critical section*/
 
-	 */
 }
 
 func priority(p *peer, id int32, clock int32) bool {
@@ -122,6 +119,6 @@ func priority(p *peer, id int32, clock int32) bool {
 	}
 }
 
-func add_to_request_queue(p peer) {
-	queued_requests = append(queued_requests, p)
+func add_to_request_queue(id int32) {
+	queued_requests = append(queued_requests, id)
 }
