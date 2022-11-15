@@ -109,7 +109,6 @@ func (p *peer) sendPingToAll() {
 			if reply.Message == "I was first!" {
 				done = false
 				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
-				p.timestamp++
 				break
 
 			} else {
