@@ -80,7 +80,7 @@ type peer struct {
 }
 
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
-	if i_want_to_get_into_citicalsection && send_priority_to_all(p, req.GetId(), req.GetTimestamp()) {
+	if i_want_to_get_into_citicalsection && p.send_priority_to_all() {
 		time.Sleep(10 * time.Second)
 		add_to_request_queue(req.GetId())
 		return nil, nil
