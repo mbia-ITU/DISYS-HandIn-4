@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	//"sync"
+
 	ping "github.com/mbia-ITU/DISYS-HandIn-4/gRPC/gRPC"
 	"google.golang.org/grpc"
 )
@@ -78,7 +80,7 @@ type peer struct {
 }
 
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
-	if i_want_to_get_into_citicalsection && priority(p, req.GetId(), req.GetTimestamp()) {
+	if i_want_to_get_into_citicalsection && send_priority_to_all(p, req.GetId(), req.GetTimestamp()) {
 		time.Sleep(10 * time.Second)
 		add_to_request_queue(req.GetId())
 		return nil, nil
@@ -105,7 +107,8 @@ func (p *peer) sendPingToAll() {
 
 }
 
-func priority(p *peer, id int32, clock int32) bool {
+func send_priority_to_all(p *peer, id int32, clock int32) bool {
+	//Send ping.priority to all peeras and use waitgroup(wg from "sync") to wait for response for every peer
 	if p.timestamp > clock {
 		return true
 	} else if clock > p.timestamp {

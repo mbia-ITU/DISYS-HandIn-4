@@ -6,10 +6,15 @@ option go_package = "./gRPC";
 
 service Ping {
     rpc ping (Request) returns (Reply) {}
+    rpc priority (Request) returns (priorityReply) {}
 }
 
 message Reply {
     string message = 1;
+}
+
+message priorityReply {
+    bool isPriority = 1;
 }
 
 message Request {
