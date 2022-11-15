@@ -78,9 +78,14 @@ type peer struct {
 }
 
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
-	if i_want_to_get_into_citicalsection && p.send_priority_to_all() {
-		add_to_request_queue(req.GetId())
-		return nil, nil
+	if i_want_to_get_into_citicalsection && req.Timestamp > p.timestamp {
+		rep := &ping.Reply{Message: "I was first!"}
+		p.timestamp++
+		return rep, nil
+	} else if i_want_to_get_into_citicalsection && req.Timestamp == p.timestamp && req.Id < p.id {
+		rep := &ping.Reply{Message: "I was first!"}
+		p.timestamp++
+		return rep, nil
 	} else {
 		rep := &ping.Reply{Message: "you're free to go"}
 		p.timestamp++
@@ -91,13 +96,23 @@ func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error)
 func (p *peer) sendPingToAll() {
 	request := &ping.Request{Id: p.id, Timestamp: p.timestamp}
 	i_want_to_get_into_citicalsection = true
-	for id, client := range p.clients {
-		reply, err := client.Ping(p.ctx, request)
-		if err != nil {
-			fmt.Println("something went wrong")
+	done := false
+	for !done {
+		done = true
+		for id, client := range p.clients {
+			reply, err := client.Ping(p.ctx, request)
+			if err != nil {
+				fmt.Println("something went wrong")
+			}
+			if reply.Message == "I was first!" {
+				done = false
+				break
+
+			} else {
+				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
+				p.timestamp++
+			}
 		}
-		fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
-		p.timestamp++
 	}
 	/*Access critical section*/
 
