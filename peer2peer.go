@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"sync"
 
 	ping "github.com/mbia-ITU/DISYS-HandIn-4/gRPC/gRPC"
 	"google.golang.org/grpc"
@@ -118,7 +117,7 @@ func (p *peer) sendPingToAll() {
 
 }
 
-func (p *peer) send_priority_to_all() bool {
+/*func (p *peer) send_priority_to_all() bool {
 	//create list of bools
 	var responses []bool
 	//create waitgroup
@@ -160,4 +159,4 @@ func (p *peer) send_priority_to_all() bool {
 
 func add_to_request_queue(id int32) {
 	queued_requests = append(queued_requests, id)
-}
+}*/
