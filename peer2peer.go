@@ -104,15 +104,20 @@ func (p *peer) sendPingToAll() {
 		done = true
 		for id, client := range p.clients {
 			reply, err := client.Ping(p.ctx, request)
-			time.Sleep(5 * time.Second)
+			time.Sleep(4 * time.Second)
 			if err != nil {
 				fmt.Println("something went wrong")
 			}
-			if reply.Message == "I was first!" {
+			if reply.Message == "I was first! (id prio)" {
 				done = false
 				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
+				p.timestamp++
 				break
-
+			} else if reply.Message == "I was first! (timestamp prio)" {
+				done = false
+				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
+				p.timestamp++
+				break
 			} else {
 				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
 				p.timestamp++
