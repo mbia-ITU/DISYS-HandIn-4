@@ -80,6 +80,9 @@ type peer struct {
 
 // The Ping() function handles priority and check if the peer, who wants access to the critical section, can actually get access.
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
+	if req.Timestamp > p.timestamp {
+		p.timestamp = req.Timestamp
+	}
 	if i_want_to_get_into_citicalsection && req.Timestamp > p.timestamp {
 		rep := &ping.Reply{Message: "I was first! (timestamp prio)"}
 		p.timestamp++
@@ -100,6 +103,7 @@ func (p *peer) sendPingToAll() {
 	request := &ping.Request{Id: p.id, Timestamp: p.timestamp}
 	i_want_to_get_into_citicalsection = true
 	done := false
+	fmt.Println("Requesting access to critical section from other cliets...")
 	for !done {
 		done = true
 		for id, client := range p.clients {
@@ -112,11 +116,13 @@ func (p *peer) sendPingToAll() {
 				done = false
 				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
 				p.timestamp++
+				fmt.Println("Resending request...")
 				break
 			} else if reply.Message == "I was first! (timestamp prio)" {
 				done = false
 				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
 				p.timestamp++
+				fmt.Println("Resending request...")
 				break
 			} else {
 				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)

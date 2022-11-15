@@ -4,3 +4,4 @@
 3: open another terminal and follow step 2, but with a different integer for each time.
 4: press enter to ping all connected peers.
 5: close terminals when done.
+
