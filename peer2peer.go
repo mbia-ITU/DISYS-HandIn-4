@@ -15,7 +15,6 @@ import (
 )
 
 var i_want_to_get_into_citicalsection bool
-var queued_requests []int32
 
 func main() {
 	arg1, _ := strconv.ParseInt(os.Args[1], 10, 32)
@@ -70,6 +69,7 @@ func main() {
 	}
 }
 
+// Each peer is a struct with an id, timestamp, a list of connected peers and context
 type peer struct {
 	ping.UnimplementedPingServer
 	id        int32
@@ -78,6 +78,7 @@ type peer struct {
 	ctx       context.Context
 }
 
+// The Ping() function handles priority and check if the peer, who wants access to the critical section, can actually get access.
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
 	if i_want_to_get_into_citicalsection && req.Timestamp > p.timestamp {
 		rep := &ping.Reply{Message: "I was first! (timestamp prio)"}
@@ -94,6 +95,7 @@ func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error)
 	}
 }
 
+// The sendPingToAll() function is responsible for "asking" for access to the critical section and asks every other peer if it can get access. It also simulates the actual critical section.
 func (p *peer) sendPingToAll() {
 	request := &ping.Request{Id: p.id, Timestamp: p.timestamp}
 	i_want_to_get_into_citicalsection = true
@@ -122,47 +124,3 @@ func (p *peer) sendPingToAll() {
 	p.timestamp++
 
 }
-
-/*func (p *peer) send_priority_to_all() bool {
-	//create list of bools
-	var responses []bool
-	//create waitgroup
-	var wg sync.WaitGroup
-	for id, client := range p.clients {
-		wg.Add(1)
-		//create go rutine for each client
-		go func(id int32, client ping.PingClient) {
-			reply, err := client.Priority(p.ctx, &ping.Request{Id: p.id, Timestamp: p.timestamp})
-
-			if err != nil {
-				fmt.Println("something went wrong")
-			}
-
-			if p.timestamp > reply.Timestamp {
-				responses = append(responses, true)
-			} else if reply.Timestamp > p.timestamp {
-				responses = append(responses, false)
-			} else {
-				if p.id < id {
-					responses = append(responses, true)
-				} else {
-					responses = append(responses, false)
-				}
-			}
-			//in go rutine wg.Done
-			wg.Done()
-		}(id, client)
-	}
-	wg.Wait()
-	//check list if all responses are true
-	for _, response := range responses {
-		if !response {
-			return false
-		}
-	}
-	return true
-}
-
-func add_to_request_queue(id int32) {
-	queued_requests = append(queued_requests, id)
-}*/
