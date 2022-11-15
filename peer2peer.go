@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	ping "github.com/mbia-ITU/DISYS-HandIn-4/gRPC/gRPC"
 	"google.golang.org/grpc"
@@ -60,6 +61,7 @@ func main() {
 		defer conn.Close()
 		c := ping.NewPingClient(conn)
 		p.clients[port] = c
+		fmt.Printf("successfully dialed: %v\n", port)
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -78,11 +80,11 @@ type peer struct {
 
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
 	if i_want_to_get_into_citicalsection && req.Timestamp > p.timestamp {
-		rep := &ping.Reply{Message: "I was first!"}
+		rep := &ping.Reply{Message: "I was first! (timestamp prio)"}
 		p.timestamp++
 		return rep, nil
 	} else if i_want_to_get_into_citicalsection && req.Timestamp == p.timestamp && req.Id < p.id {
-		rep := &ping.Reply{Message: "I was first!"}
+		rep := &ping.Reply{Message: "I was first! (id prio)"}
 		p.timestamp++
 		return rep, nil
 	} else {
@@ -100,11 +102,14 @@ func (p *peer) sendPingToAll() {
 		done = true
 		for id, client := range p.clients {
 			reply, err := client.Ping(p.ctx, request)
+			time.Sleep(5 * time.Second)
 			if err != nil {
 				fmt.Println("something went wrong")
 			}
 			if reply.Message == "I was first!" {
 				done = false
+				fmt.Printf("Got reply from id %v: %v\n", id, reply.Message)
+				p.timestamp++
 				break
 
 			} else {
@@ -113,7 +118,9 @@ func (p *peer) sendPingToAll() {
 			}
 		}
 	}
-	/*Access critical section*/
+	fmt.Printf("%v just accessed the critical section at timestamp %v\n", p.id, p.timestamp)
+	i_want_to_get_into_citicalsection = false
+	p.timestamp++
 
 }
 
