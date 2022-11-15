@@ -8,9 +8,7 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"time"
-
-	//"sync"
+	"sync"
 
 	ping "github.com/mbia-ITU/DISYS-HandIn-4/gRPC/gRPC"
 	"google.golang.org/grpc"
@@ -81,10 +79,8 @@ type peer struct {
 
 func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error) {
 	if i_want_to_get_into_citicalsection && p.send_priority_to_all() {
-		time.Sleep(10 * time.Second)
 		add_to_request_queue(req.GetId())
 		return nil, nil
-		//Only beat one other peer. How do we make it wait until other peers are checked and beaten?
 	} else {
 		rep := &ping.Reply{Message: "you're free to go"}
 		p.timestamp++
@@ -108,28 +104,43 @@ func (p *peer) sendPingToAll() {
 }
 
 func (p *peer) send_priority_to_all() bool {
+	//create list of bools
+	var responses []bool
+	//create waitgroup
+	var wg sync.WaitGroup
 	for id, client := range p.clients {
+		wg.Add(1)
+		//create go rutine for each client
+		go func(id int32, client ping.PingClient) {
+			reply, err := client.Priority(p.ctx, &ping.Request{Id: p.id, Timestamp: p.timestamp})
 
-		reply, err := client.Priority(p.ctx, &ping.Request{Id: p.id, Timestamp: p.timestamp})
-
-		if err != nil {
-			fmt.Println("something went wrong")
-		}
-
-		if p.timestamp > reply.IsPriority {
-			return true
-		} else if clock > p.timestamp {
-			return false
-		} else {
-			if p.id < id {
-				return true
-			} else {
-				return false
+			if err != nil {
+				fmt.Println("something went wrong")
 			}
+
+			if p.timestamp > reply.Timestamp {
+				responses = append(responses, true)
+			} else if reply.Timestamp > p.timestamp {
+				responses = append(responses, false)
+			} else {
+				if p.id < id {
+					responses = append(responses, true)
+				} else {
+					responses = append(responses, false)
+				}
+			}
+			//in go rutine wg.Done
+			wg.Done()
+		}(id, client)
+	}
+	wg.Wait()
+	//check list if all responses are true
+	for _, response := range responses {
+		if !response {
+			return false
 		}
 	}
-
-	//Send ping.priority to all peeras and use waitgroup(wg from "sync") to wait for response for every peer
+	return true
 }
 
 func add_to_request_queue(id int32) {
