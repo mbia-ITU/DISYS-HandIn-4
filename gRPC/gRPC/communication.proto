@@ -15,6 +15,7 @@ message Reply {
 
 message priorityReply {
     bool isPriority = 1;
+    int32 timestamp = 2;
 }
 
 message Request {

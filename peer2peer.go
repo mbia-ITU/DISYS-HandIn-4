@@ -107,19 +107,29 @@ func (p *peer) sendPingToAll() {
 
 }
 
-func send_priority_to_all(p *peer, id int32, clock int32) bool {
-	//Send ping.priority to all peeras and use waitgroup(wg from "sync") to wait for response for every peer
-	if p.timestamp > clock {
-		return true
-	} else if clock > p.timestamp {
-		return false
-	} else {
-		if p.id < id {
+func (p *peer) send_priority_to_all() bool {
+	for id, client := range p.clients {
+
+		reply, err := client.Priority(p.ctx, &ping.Request{Id: p.id, Timestamp: p.timestamp})
+
+		if err != nil {
+			fmt.Println("something went wrong")
+		}
+
+		if p.timestamp > reply.IsPriority {
 			return true
-		} else {
+		} else if clock > p.timestamp {
 			return false
+		} else {
+			if p.id < id {
+				return true
+			} else {
+				return false
+			}
 		}
 	}
+
+	//Send ping.priority to all peeras and use waitgroup(wg from "sync") to wait for response for every peer
 }
 
 func add_to_request_queue(id int32) {
