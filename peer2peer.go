@@ -87,7 +87,7 @@ func (p *peer) Ping(ctx context.Context, req *ping.Request) (*ping.Reply, error)
 		}
 		p.timestamp++
 		return rep, nil
-	} else if i_want_to_get_into_citicalsection && req.Timestamp == p.timestamp && req.Id < p.id {
+	} else if i_want_to_get_into_citicalsection && req.Timestamp == p.timestamp && req.Id > p.id {
 		rep := &ping.Reply{Message: "I was first! (id prio)"}
 		if req.Timestamp > p.timestamp {
 			p.timestamp = req.Timestamp
